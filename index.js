@@ -1,10 +1,37 @@
 // Dependencies
 const http = require('http');
+const https = require('https');
 const { URL } = require('url');
 const StringDecoder = require('string_decoder').StringDecoder;
+const config = require('./config');
+const fs = require('fs');
 
-// The server should respond to all requests with a string
-var server = http.createServer((req, res) => {
+// Instantiate the HTTP server
+const httpServer = http.createServer((req, res) => {
+  unifiedServer(req, res);
+});
+
+// Start the server
+httpServer.listen(config.httpPort, () => {
+  console.log(`The server is listening on port ${config.httpPort}`);
+});
+
+// Instantiate the HTTPS server
+const httpsServerOptions = {
+  key: fs.readFileSync('./https/key.pem'),
+  cert: fs.readFileSync('./https/cert.pem'),
+};
+const httpsServer = https.createServer(httpsServerOptions, (req, res) => {
+  unifiedServer(req, res);
+});
+
+// Start the HTTPS server
+httpsServer.listen(config.httpsPort, () => {
+  console.log(`The server is listening on port ${config.httpsPort}`);
+});
+
+// All the sever logic for both the http and https sever
+const unifiedServer = (req, res) => {
   // Get the URL and parse it
   const parsedUrl = new URL(req.url, 'http://localhost:3000/');
 
@@ -48,7 +75,7 @@ var server = http.createServer((req, res) => {
     };
 
     // Route the request to the handler specified in the router
-    chosenHandler(data, function (statusCode, payload) {
+    chosenHandler(data, (statusCode, payload) => {
       // Use the status code called back by the handler or default to 200
       statusCode = typeof statusCode == 'number' ? statusCode : 200;
 
@@ -59,25 +86,20 @@ var server = http.createServer((req, res) => {
       const payloadStrings = JSON.stringify(payload);
 
       // Return the response
+      res.setHeader('Content-Type', 'application/json');
       res.writeHead(statusCode);
       res.end(payloadStrings);
       console.log('Returning this response: ', statusCode, payloadStrings);
     });
   });
-});
-
-// Start the server, and have it listen on port 3000
-server.listen(3000, () => {
-  console.log('The server is listening on port 3000 now');
-});
+};
 
 // Define the handlers
 const handlers = {};
 
-// Sample handler
-handlers.sample = function (data, callback) {
-  // Callback a http status code, and a payload
-  callback(406, { name: 'sample handler' });
+// Ping handler
+handlers.ping = (data, callback) => {
+  callback(200);
 };
 
 // Not found handler
@@ -87,5 +109,5 @@ handlers.notFound = function (data, callback) {
 
 // Define a request router
 const router = {
-  sample: handlers.sample,
+  ping: handlers.ping,
 };
