@@ -5,6 +5,25 @@ const { URL } = require('url');
 const StringDecoder = require('string_decoder').StringDecoder;
 const config = require('./config');
 const fs = require('fs');
+const _data = require('./lib/data');
+
+// TESTING
+//@TODO delete this
+// _data.create('test', 'newFile', { foo: 'bar' }, function (err) {
+//   console.log('This was the error:', err);
+// });
+
+// _data.read('test', 'newFile', function (err, data) {
+//   console.log(`This was the error: ${err}, and this the data: ${data}`);
+// });
+
+_data.update('test', 'newFile', { fizz: 'diego' }, function (err) {
+  console.log(`This was the error: ${err}`);
+});
+
+// _data.delete('test', 'newFile', function (err) {
+//   console.log(`this was the error: ${err}`);
+// });
 
 // Instantiate the HTTP server
 const httpServer = http.createServer((req, res) => {
@@ -35,18 +54,13 @@ const unifiedServer = (req, res) => {
   // Get the URL and parse it
   const parsedUrl = new URL(req.url, 'http://localhost:3000/');
 
-  // Get the path and trim it using regex
-  const path = parsedUrl.pathname;
-  const trimmedPath = path.replace(/^\/+|\/+$/g, '');
+  // Get the path and trim it using regex, get the query string as an object
+  const { pathname, searchParams } = parsedUrl;
+  const trimmedPath = pathname.replace(/^\/+|\/+$/g, '');
+  const queryStringObject = searchParams;
 
-  // Get the query string as an object
-  const queryStringObject = parsedUrl.searchParams;
-
-  // Get the HTTP Method
-  const method = req.method.toLowerCase();
-
-  // Get the headers as an object
-  const headers = req.headers;
+  // Get the HTTP Method nad headers
+  const { method, headers } = req;
 
   // Get the payload, if any
   const decoder = new StringDecoder('utf-8');
@@ -103,7 +117,7 @@ handlers.ping = (data, callback) => {
 };
 
 // Not found handler
-handlers.notFound = function (data, callback) {
+handlers.notFound = (data, callback) => {
   callback(404);
 };
 
