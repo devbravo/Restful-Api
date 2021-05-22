@@ -59,7 +59,7 @@ const unifiedServer = (req, res) => {
   // Get the path and trim it using regex, get the query string as an object
   const { pathname, searchParams } = parsedUrl;
   const trimmedPath = pathname.replace(/^\/+|\/+$/g, '');
-  const queryStringObject = searchParams;
+  const queryStringObject = parsedUrl.searchParams;
 
   // Get the HTTP Method nad headers
   const { method, headers } = req;
@@ -89,7 +89,6 @@ const unifiedServer = (req, res) => {
       headers: headers,
       payload: helpers.parseJsonToObject(buffer),
     };
-    console.log('hey', data);
 
     // Route the request to the handler specified in the router
     chosenHandler(data, (statusCode, payload) => {
