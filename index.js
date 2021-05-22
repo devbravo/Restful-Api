@@ -3,23 +3,25 @@ const http = require('http');
 const https = require('https');
 const { URL } = require('url');
 const StringDecoder = require('string_decoder').StringDecoder;
-const config = require('./config');
+const config = require('./lib/config');
 const fs = require('fs');
 const _data = require('./lib/data');
+const handlers = require('./lib/handlers');
+const helpers = require('./lib/helpers');
 
 // TESTING
-//@TODO delete this
-// _data.create('test', 'newFile', { foo: 'bar' }, function (err) {
+// @TODO delete this
+// _data.create('test', 'newFile', { foo: 'bar' }, async function (err) {
 //   console.log('This was the error:', err);
 // });
 
-// _data.read('test', 'newFile', function (err, data) {
-//   console.log(`This was the error: ${err}, and this the data: ${data}`);
+// const readData = _data.read('test', 'newFile', function (err, data) {
+//   console.log(`Error: ${err}, Data: ${data}`);
 // });
 
-_data.update('test', 'newFile', { fizz: 'diego' }, function (err) {
-  console.log(`This was the error: ${err}`);
-});
+// _data.update('test', 'newFile', { sabajo: 'diego' }, function (err) {
+//   console.log(`This was the error: ${err}`);
+// });
 
 // _data.delete('test', 'newFile', function (err) {
 //   console.log(`this was the error: ${err}`);
@@ -83,10 +85,11 @@ const unifiedServer = (req, res) => {
     const data = {
       trimmedPath: trimmedPath,
       queryStringObject: queryStringObject,
-      method: method,
+      method: method.toLowerCase(),
       headers: headers,
-      payload: buffer,
+      payload: helpers.parseJsonToObject(buffer),
     };
+    console.log('hey', data);
 
     // Route the request to the handler specified in the router
     chosenHandler(data, (statusCode, payload) => {
@@ -103,25 +106,13 @@ const unifiedServer = (req, res) => {
       res.setHeader('Content-Type', 'application/json');
       res.writeHead(statusCode);
       res.end(payloadStrings);
-      console.log('Returning this response: ', statusCode, payloadStrings);
+      console.log('Returning this response:', statusCode, payloadStrings);
     });
   });
-};
-
-// Define the handlers
-const handlers = {};
-
-// Ping handler
-handlers.ping = (data, callback) => {
-  callback(200);
-};
-
-// Not found handler
-handlers.notFound = (data, callback) => {
-  callback(404);
 };
 
 // Define a request router
 const router = {
   ping: handlers.ping,
+  users: handlers.users,
 };
