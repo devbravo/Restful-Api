@@ -9,24 +9,6 @@ const _data = require('./lib/data');
 const handlers = require('./lib/handlers');
 const helpers = require('./lib/helpers');
 
-// TESTING
-// @TODO delete this
-// _data.create('test', 'newFile', { foo: 'bar' }, async function (err) {
-//   console.log('This was the error:', err);
-// });
-
-// const readData = _data.read('test', 'newFile', function (err, data) {
-//   console.log(`Error: ${err}, Data: ${data}`);
-// });
-
-// _data.update('test', 'newFile', { sabajo: 'diego' }, function (err) {
-//   console.log(`This was the error: ${err}`);
-// });
-
-// _data.delete('test', 'newFile', function (err) {
-//   console.log(`this was the error: ${err}`);
-// });
-
 // Instantiate the HTTP server
 const httpServer = http.createServer((req, res) => {
   unifiedServer(req, res);
@@ -59,7 +41,7 @@ const unifiedServer = (req, res) => {
   // Get the path and trim it using regex, get the query string as an object
   const { pathname, searchParams } = parsedUrl;
   const trimmedPath = pathname.replace(/^\/+|\/+$/g, '');
-  const queryStringObject = parsedUrl.searchParams;
+  const queryStringObject = searchParams;
 
   // Get the HTTP Method nad headers
   const { method, headers } = req;
@@ -114,4 +96,6 @@ const unifiedServer = (req, res) => {
 const router = {
   ping: handlers.ping,
   users: handlers.users,
+  tokens: handlers.tokens,
+  checks: handlers.checks,
 };
