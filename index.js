@@ -1,29 +1,24 @@
+/*
+ * Primary file for the API
+ */
+
 // Dependencies
-const http = require('http');
-const url = require('url');
+const server = require('./lib/server');
+const workers = require('./lib/workers');
 
-// The server should respond to all requests with a string
-var server = http.createServer((req, res) => {
-  // Get the URL and parse it
-  const parsedUrl = new URL(req.url, 'https://example.org/');
+// Declare the app
+const app = {};
 
-  // Get the path
-  const path = parsedUrl.pathname;
-  const trimmedPath = path.replace(/^\/+|\/+$/g, '');
+// Init function
+app.init = function () {
+  // Start the server
+  server.init();
+  // Start the workers
+  workers.init();
+};
 
-  // Get the HTTP Method
-  const method = req.method.toLowerCase();
+// Execute
+app.init();
 
-  // Send the response
-  res.end('Hello World\n');
-
-  // Log the request path
-  console.log(
-    `Request received on path: ${trimmedPath} with method: ${method}`
-  );
-});
-
-// Start the server, and have it listen on port 3000
-server.listen(3000, () => {
-  console.log('The server is listening on port 3000 now');
-});
+// Export the app
+module.exports = app;
